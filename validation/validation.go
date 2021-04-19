@@ -27,7 +27,11 @@ type validationErrorMap map[string][]error
 
 func (e *ValidationError) Error() string {
 	var errorBuffer bytes.Buffer
-	headerLine := fmt.Sprintf("%s object validation failed:", e.DataType)
+	dataType := e.DataType
+	if dataType == "" {
+		dataType = "value"
+	}
+	headerLine := fmt.Sprintf("%s object validation failed:", dataType)
 	fmt.Fprint(&errorBuffer, headerLine)
 	for key, error := range e.Errors {
 		fmt.Fprintf(&errorBuffer, "\t%s: %s", key, error)
@@ -36,8 +40,9 @@ func (e *ValidationError) Error() string {
 }
 
 var (
-	pointerNilTemplate string                                = "field %s was nil but is required"
-	validators         map[string]validator.ValidatorFactory = map[string]validator.ValidatorFactory{
+	pointerNilTemplate string = "field %s was nil but is required"
+	// This map contains a contains a validator.ValidatorFactory for each registered validator name.
+	validators map[string]validator.ValidatorFactory = map[string]validator.ValidatorFactory{
 		"email":      emailvalidator.New,
 		"float":      floatvalidator.New,
 		"int":        intvalidator.New,
@@ -192,7 +197,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 }
 
 // Thinking of building validation code to read tags.
-// The Validator parameter is present to allow for validating non struct values. In this event A *Validator can be passed in and evaluated on a non struct value link an individual int or string
+// The Validator parameter is present to allow for validating non struct values. In this function A *Validator can be passed in and evaluated on a non struct value like an individual int or string
 // TODO: Validate nested structs and arrays.
 func Validate(v *validationparams.ValidationParams) (*ValidationError, error) {
 	validationErrors := validationErrorMap{}
@@ -208,6 +213,7 @@ func Validate(v *validationparams.ValidationParams) (*ValidationError, error) {
 	return nil, nil
 }
 
+// This function valudates an input struct based on the validation tags is has in its tag data.
 func ValidateStructWithTag(s interface{}) *ValidationError {
 	validationErrors := validationErrorMap{}
 	validationData := validationparams.New()
@@ -221,6 +227,7 @@ func ValidateStructWithTag(s interface{}) *ValidationError {
 	return nil
 }
 
+// This allows you to register custom validator to be read from struct field tag validatoin data.
 func RegisterValidator(name string, validator func() validator.Validator) {
 	validators[name] = validator
 }
