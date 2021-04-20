@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	numberMinValueErrorTemplate = "The field %s value %i is less than the minimum value %i"
-	numberMaxValueErrorTemplate = "The field %s value %i is greater than the maximum value %i"
+	numberMinValueErrorTemplate = "min: the field %s value %d is less than the minimum value %d"
+	numberMaxValueErrorTemplate = "max: the field %s value %d is greater than the maximum value %d"
 )
 
 // uint validator

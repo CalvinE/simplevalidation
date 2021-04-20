@@ -16,8 +16,8 @@ type postalcodeValidator struct {
 }
 
 var (
-	postalcodeInvalidErrorTemplate  = "The field %s does cont contain a valid email. '%s' was provided"
-	postalcodeRequiredErrorTemplate = "The field %s is required"
+	postalcodeInvalidErrorTemplate  = "invalid: the field %s does cont contain a valid email. '%s' was provided"
+	postalcodeRequiredErrorTemplate = "required: the field %s is required"
 
 	postalCodeValidationRegexp = regexp.MustCompile("^[0-9]{5}$")
 )

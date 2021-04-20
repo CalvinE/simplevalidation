@@ -18,20 +18,32 @@ import (
 	"github.com/calvine/simplevalidation/validator/uuidvalidator"
 )
 
+/*
+	ValidationError represents the overall validation state of a value.
+*/
 type ValidationError struct {
 	DataType string
 	Errors   validationErrorMap
 }
 
+/*
+	validationErrorMap is an alias for a:
+		map[string][]error
+
+	The key for the map is the field being validated. when validating a struct its the name of a field, when validting a non struct value, it defaults to "value".
+*/
 type validationErrorMap map[string][]error
 
+/*
+	Error produces a string that relays all of the validation failures from validation.
+*/
 func (e *ValidationError) Error() string {
 	var errorBuffer bytes.Buffer
 	dataType := e.DataType
 	if dataType == "" {
 		dataType = "value"
 	}
-	headerLine := fmt.Sprintf("%s object validation failed:", dataType)
+	headerLine := fmt.Sprintf("%s validation failed:", dataType)
 	fmt.Fprint(&errorBuffer, headerLine)
 	for key, error := range e.Errors {
 		fmt.Fprintf(&errorBuffer, "\t%s: %s", key, error)
@@ -40,8 +52,9 @@ func (e *ValidationError) Error() string {
 }
 
 var (
+	// pointerNilTemplate is the error message template then a required value is a pointer and also nil.
 	pointerNilTemplate string = "field %s was nil but is required"
-	// This map contains a contains a validator.ValidatorFactory for each registered validator name.
+	// validators is a map contains a contains a validator.ValidatorFactory for each registered validator name.
 	validators map[string]validator.ValidatorFactory = map[string]validator.ValidatorFactory{
 		"email":      emailvalidator.New,
 		"float":      floatvalidator.New,
@@ -53,6 +66,8 @@ var (
 	}
 )
 
+// getValidatorFromTag Takes in the validator name from the tag data and returns an instance of the appropriate validator.
+// When the validatorName parameter is not registererd in the validators map, the function returns an error.
 func getValidatorFromTag(validatorName, fieldName string) (validator.Validator, error) {
 	if validatorName == "struct" {
 		return nil, nil
@@ -65,6 +80,8 @@ func getValidatorFromTag(validatorName, fieldName string) (validator.Validator, 
 	return typeValidatorFactory(), nil
 }
 
+// getValidatorInfo reads in the raw validator name from the tag data, and parses pairs of square brackets to determin the ArrayDepth of the value being validated.
+// It returns the plain validator name (with any square bracket pairs removed) for looking up in the validators map, and the array depth for the validator to use.
 func getValidatorInfo(validatorName string) (name string, arrayDepth uint8) {
 	arrayDepth = 0
 	tagNameStartIndex := 0
@@ -81,6 +98,16 @@ func getValidatorInfo(validatorName string) (name string, arrayDepth uint8) {
 	return validatorName[tagNameStartIndex:], arrayDepth
 }
 
+/*
+	performFieldValidation is the core of the validation work flow. it takes a ValidationParams struct and a pointer to a validationErrorMap.
+ 	It then proceeds to call its self recursivly, until all validation is completed. Upon completion the validationErrors parameter is populated with all errors arising from validation.
+
+	This function handles the following cases:
+		- When the value being validated is a pointer it is dereferenced, and the validated.
+			- When that pointer is nil validation is skipped, unless the validationparams.ValidationParams.Required field is true, then it will register a validation error.
+		- When the field being validated is a struct the struct fields are traversed and the function attempts to build the appropriate validator based on the validator tag data.
+		- When the field is any other kind it will attempt to validate the value, if the validationparams.ValidationParams.ArrayDepth is greater than 0 the function will iterate of the array / slice and validate each value for each level of array / slice.
+*/
 func performFieldValidation(validationInfo validationparams.ValidationParams, validationErrors *validationErrorMap) {
 	fieldErrors := []error{}
 	value := reflect.ValueOf(validationInfo.Value)
@@ -89,6 +116,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 	// fmt.Printf("%v - %v\n\n", kind, vType.String())
 	switch kind {
 	case reflect.Ptr:
+		// handle pointers.
 		isNil := value.IsNil()
 		if !validationInfo.Required && isNil {
 			// If there is only 1 tag arg, its the validation type.
@@ -110,7 +138,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 			performFieldValidation(recursiveFieldValidator, validationErrors)
 		}
 	case reflect.Struct:
-		// handle embedded structs...
+		// handle structs and embedded structs.
 		structDepth := validationInfo.StructDepth + 1
 		for i := 0; i < value.NumField(); i++ {
 			field := vType.Field(i)
@@ -163,7 +191,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 			}
 		}
 	default:
-		// perform normal field validation
+		// perform normal field validation.
 		if validationInfo.ArrayDepth == 0 {
 			_, fieldError := validationInfo.FieldValidator.Validate(validationInfo.Value, validationInfo.Name, kind)
 			if fieldError != nil {
@@ -172,7 +200,8 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 		} else {
 			// potentially nested array element validation.
 			currentArrayDepth := validationInfo.ArrayDepth
-			switch reflect.TypeOf(validationInfo.Value).Kind() {
+			// kind := reflect.TypeOf(validationInfo.Value).Kind()
+			switch kind {
 			case reflect.Slice, reflect.Array:
 				currentArrayDepth--
 				currentLevelSlice := reflect.ValueOf(validationInfo.Value)
@@ -196,9 +225,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 	}
 }
 
-// Thinking of building validation code to read tags.
-// The Validator parameter is present to allow for validating non struct values. In this function A *Validator can be passed in and evaluated on a non struct value like an individual int or string
-// TODO: Validate nested structs and arrays.
+//The Validator parameter is present to allow for validating non struct values. In this function A Validator pointer can be passed in and evaluated on a non struct value like an individual int or string.
 func Validate(v *validationparams.ValidationParams) (*ValidationError, error) {
 	validationErrors := validationErrorMap{}
 	if v == nil {
@@ -213,7 +240,7 @@ func Validate(v *validationparams.ValidationParams) (*ValidationError, error) {
 	return nil, nil
 }
 
-// This function valudates an input struct based on the validation tags is has in its tag data.
+// This function validates an input struct based on the validation tags is has in its tag data.
 func ValidateStructWithTag(s interface{}) *ValidationError {
 	validationErrors := validationErrorMap{}
 	validationData := validationparams.New()
@@ -228,6 +255,6 @@ func ValidateStructWithTag(s interface{}) *ValidationError {
 }
 
 // This allows you to register custom validator to be read from struct field tag validatoin data.
-func RegisterValidator(name string, validator func() validator.Validator) {
-	validators[name] = validator
+func RegisterValidator(name string, customValidatorFactory validator.ValidatorFactory) {
+	validators[name] = customValidatorFactory
 }

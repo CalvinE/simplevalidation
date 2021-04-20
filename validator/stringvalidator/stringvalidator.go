@@ -13,6 +13,11 @@ import (
 // Struct that contains the fields required to validate a string.
 type stringValidator struct {
 	// The min length allowed for the input string.
+	// One note this this implementation is that if if have a min value set, and you provide no value,
+	// we technically say that is valid, because not providing a value is covered under
+	// the required option case.
+	// Alternatively, if you have a min set to 3 and procive a string with a length of 2
+	// that will fail validation.
 	Min *int
 	// The max length allowed for the input string.
 	Max *int
@@ -22,9 +27,9 @@ type stringValidator struct {
 }
 
 var (
-	stringMinLengthTemplate = "The value of %s is %s of length %d which is less than the minimum length %d"
-	stringMaxLengthTemplate = "The value of %s is %s of length %d which is greater than the maximum length %d"
-	stringRequiredTemplate  = "The value of %s is blank"
+	stringMinLengthTemplate = "min length: the value of %s is %s of length %d which is less than the minimum length %d"
+	stringMaxLengthTemplate = "max length: the value of %s is %s of length %d which is greater than the maximum length %d"
+	stringRequiredTemplate  = "required: the value of %s is blank"
 )
 
 func New() validator.Validator {
@@ -35,8 +40,9 @@ func New() validator.Validator {
 func (nv *stringValidator) Validate(n interface{}, fieldName string, fieldKind reflect.Kind) (bool, error) {
 	stringValue := n.(string)
 	valueLength := len(stringValue)
+	noValueProvided := valueLength == 0
 	if nv.Min != nil {
-		if valueLength < *nv.Min {
+		if (!noValueProvided || *nv.Min == 0) && valueLength < *nv.Min {
 			errorMessage := fmt.Sprintf(stringMinLengthTemplate, fieldName, valueLength, stringValue, *nv.Min)
 			return false, errors.New(errorMessage)
 		}
@@ -47,7 +53,7 @@ func (nv *stringValidator) Validate(n interface{}, fieldName string, fieldKind r
 			return false, errors.New(errorMessage)
 		}
 	}
-	if nv.Required && valueLength == 0 {
+	if nv.Required && noValueProvided {
 		errorMessage := fmt.Sprintf(stringRequiredTemplate, fieldName)
 		return false, errors.New(errorMessage)
 	}

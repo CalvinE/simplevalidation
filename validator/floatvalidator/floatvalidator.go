@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	numberMinValueErrorTemplate = "The field %s value %i is less than the minimum value %i"
-	numberMaxValueErrorTemplate = "The field %s value %i is greater than the maximum value %i"
+	numberMinValueErrorTemplate = "min: the field %s value %f is less than the minimum value %f"
+	numberMaxValueErrorTemplate = "max: the field %s value %f is greater than the maximum value %f"
 )
 
 type floatValidator struct {

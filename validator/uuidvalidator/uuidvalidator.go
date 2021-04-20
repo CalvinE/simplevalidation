@@ -18,9 +18,9 @@ type uuidValidator struct {
 }
 
 var (
-	uuidStringProvidedErrorTemplate = "The field %s is a string, but allowstring was not provided in the validation tag."
-	uuidInvalidStringErrorTemplate  = "The field %s has the value %s which could not be parsed into a UUID."
-	uuidNoValueErrorTemplate        = "The field %s had an empty value: %v"
+	uuidStringProvidedErrorTemplate = "type: The field %s is a string, but allowstring was not provided in the validation tag."
+	uuidInvalidStringErrorTemplate  = "invalid: the field %s has the value %s which could not be parsed into a UUID."
+	uuidNoValueErrorTemplate        = "required: The field %s had an empty value: %v"
 )
 
 func New() validator.Validator {

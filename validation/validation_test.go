@@ -9,7 +9,7 @@ import (
 // This is for testing embedded structs
 type OtherThing struct {
 	ID          int    `validate:"int,required,min=3"`
-	Description string `validate:"string,min=0,max=150"`
+	Description string `validate:"string,min=15,max=150"`
 }
 
 // this is for testing fields with struct values
