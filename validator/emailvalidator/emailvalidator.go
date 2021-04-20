@@ -18,12 +18,14 @@ type emailValidator struct {
 	Required      bool
 }
 
-var (
+const (
 	emailInvalidErrorTemplate          = "invalid: the field %s does cont contain a valid email. '%s' was provided"
 	emailRequiredErrorTemplate         = "required: the field %s is required"
 	emailDomainMXNotFoundErrorTemplate = "mxmissing: The field %s had no MX records found for domain %s"
 	emailDomainMXLookupErrorTemplate   = "mxerror: The field %s encountered an error occurred while validating domain MX record for domain %s. Error: %s"
+)
 
+var (
 	emailValidationRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 )
 

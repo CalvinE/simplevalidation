@@ -15,10 +15,12 @@ type postalcodeValidator struct {
 	Required bool
 }
 
-var (
+const (
 	postalcodeInvalidErrorTemplate  = "invalid: the field %s does cont contain a valid email. '%s' was provided"
 	postalcodeRequiredErrorTemplate = "required: the field %s is required"
+)
 
+var (
 	postalCodeValidationRegexp = regexp.MustCompile("^[0-9]{5}$")
 )
 

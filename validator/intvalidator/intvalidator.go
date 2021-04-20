@@ -10,9 +10,9 @@ import (
 	"github.com/calvine/simplevalidation/validator"
 )
 
-var (
-	numberMinValueErrorTemplate = "min: the field %s value %i is less than the minimum value %i"
-	numberMaxValueErrorTemplate = "max: The field %s value %i is greater than the maximum value %i"
+const (
+	numberMinValueErrorTemplate = "min: the field %s value %d is less than the minimum value %d"
+	numberMaxValueErrorTemplate = "max: The field %s value %d is greater than the maximum value %d"
 )
 
 // int validator

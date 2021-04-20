@@ -26,7 +26,7 @@ type stringValidator struct {
 	//pattern string
 }
 
-var (
+const (
 	stringMinLengthTemplate = "min length: the value of %s is %s of length %d which is less than the minimum length %d"
 	stringMaxLengthTemplate = "max length: the value of %s is %s of length %d which is greater than the maximum length %d"
 	stringRequiredTemplate  = "required: the value of %s is blank"
@@ -43,13 +43,13 @@ func (nv *stringValidator) Validate(n interface{}, fieldName string, fieldKind r
 	noValueProvided := valueLength == 0
 	if nv.Min != nil {
 		if (!noValueProvided || *nv.Min == 0) && valueLength < *nv.Min {
-			errorMessage := fmt.Sprintf(stringMinLengthTemplate, fieldName, valueLength, stringValue, *nv.Min)
+			errorMessage := fmt.Sprintf(stringMinLengthTemplate, fieldName, stringValue, valueLength, *nv.Min)
 			return false, errors.New(errorMessage)
 		}
 	}
 	if nv.Max != nil {
 		if valueLength > *nv.Max {
-			errorMessage := fmt.Sprintf(stringMaxLengthTemplate, fieldName, valueLength, stringValue, *nv.Min)
+			errorMessage := fmt.Sprintf(stringMaxLengthTemplate, fieldName, stringValue, valueLength, *nv.Min)
 			return false, errors.New(errorMessage)
 		}
 	}

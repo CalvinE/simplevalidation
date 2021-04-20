@@ -114,8 +114,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 	kind := value.Kind()
 	vType := value.Type()
 	// fmt.Printf("%v - %v\n\n", kind, vType.String())
-	switch kind {
-	case reflect.Ptr:
+	if kind == reflect.Ptr {
 		// handle pointers.
 		isNil := value.IsNil()
 		if !validationInfo.Required && isNil {
@@ -137,7 +136,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 			}
 			performFieldValidation(recursiveFieldValidator, validationErrors)
 		}
-	case reflect.Struct:
+	} else if kind == reflect.Struct && validationInfo.FieldValidator == nil {
 		// handle structs and embedded structs.
 		structDepth := validationInfo.StructDepth + 1
 		for i := 0; i < value.NumField(); i++ {
@@ -190,7 +189,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 				performFieldValidation(validationData, validationErrors)
 			}
 		}
-	default:
+	} else {
 		// perform normal field validation.
 		if validationInfo.ArrayDepth == 0 {
 			_, fieldError := validationInfo.FieldValidator.Validate(validationInfo.Value, validationInfo.Name, kind)
@@ -220,6 +219,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 			}
 		}
 	}
+	// }
 	if len(fieldErrors) > 0 {
 		(*validationErrors)[validationInfo.Name] = fieldErrors
 	}

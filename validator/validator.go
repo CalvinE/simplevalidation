@@ -2,6 +2,10 @@ package validator
 
 import "reflect"
 
+const (
+	InvalidTypeErrorTemplate = "type: the value of %s is of type %T which is not valid"
+)
+
 // This interface represents a data validator, they are intended to be simple and easy to implement for custom types.
 type Validator interface {
 	// Validate takes a value, fieldName if from struct, and the fieldKind and returns true if valid and false if not.
