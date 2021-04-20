@@ -15,6 +15,9 @@
 	The format is a comma sperated list of validation parameters where:
 
 		- The first parameter is always the validator name as registered in the validators map in the validation package.
+			- There is a special case when validating an embedded struct, you need the tag data, but for the validator name you need to add "struct" like below:
+				- `validate:"struct"`
+			- You can still have the required parameter in the tag data also, and if the underlying field is a pointer then the normal required rules for a pointer apply.
 		- The second parameter is the validator parameters, if you are using the required parameter for any validator, it bus the the second parameter in the tag data to be registered properly.
 		- After than, any additional validator parameters that you may need
 
