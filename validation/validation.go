@@ -156,6 +156,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 			fieldValue := value.Field(i)
 			tagArgs := strings.Split(tag, ",")
 			required := len(tagArgs) > 1 && tagArgs[1] == "required"
+			// TODO: Add struct case as special key word?
 			validatorName, arrayDepth := getValidatorInfo(tagArgs[0])
 			validator, err := getValidatorFromTag(validatorName, fieldName)
 			if err != nil {
