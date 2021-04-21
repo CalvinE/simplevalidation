@@ -76,6 +76,32 @@ func TestValidInt64Value(t *testing.T) {
 	}
 }
 
+func TestValidIntValueNoMin(t *testing.T) {
+	max := int64(3)
+	tValidator := intValidator{
+		Max: &max,
+	}
+	testValue := int(2)
+	valueKind := reflect.TypeOf(testValue).Kind()
+	isValid, err := tValidator.Validate(testValue, "testValue", valueKind)
+	if !isValid {
+		t.Error("isValid should be true, but an error occurred: ", err.Error())
+	}
+}
+
+func TestValidIntValueNoMax(t *testing.T) {
+	min := int64(1)
+	tValidator := intValidator{
+		Min: &min,
+	}
+	testValue := int(2)
+	valueKind := reflect.TypeOf(testValue).Kind()
+	isValid, err := tValidator.Validate(testValue, "testValue", valueKind)
+	if !isValid {
+		t.Error("isValid should be true, but an error occurred: ", err.Error())
+	}
+}
+
 func TestValidMinInclusive(t *testing.T) {
 	min, max := int64(1), int64(2)
 	tValidator := intValidator{

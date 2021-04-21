@@ -34,6 +34,32 @@ func TestValidFloat64Value(t *testing.T) {
 	}
 }
 
+func TestValidFloatValueNoMin(t *testing.T) {
+	max := float64(3)
+	tValidator := floatValidator{
+		Max: &max,
+	}
+	testValue := float64(2)
+	valueKind := reflect.TypeOf(testValue).Kind()
+	isValid, err := tValidator.Validate(testValue, "testValue", valueKind)
+	if !isValid {
+		t.Error("isValid should be true, but an error occurred: ", err.Error())
+	}
+}
+
+func TestValidFloatValueNoMax(t *testing.T) {
+	min := float64(1)
+	tValidator := floatValidator{
+		Min: &min,
+	}
+	testValue := float64(2)
+	valueKind := reflect.TypeOf(testValue).Kind()
+	isValid, err := tValidator.Validate(testValue, "testValue", valueKind)
+	if !isValid {
+		t.Error("isValid should be true, but an error occurred: ", err.Error())
+	}
+}
+
 func TestValidMinInclusive(t *testing.T) {
 	min, max := float64(1.1), float64(2.2)
 	tValidator := floatValidator{

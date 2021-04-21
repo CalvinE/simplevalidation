@@ -39,6 +39,36 @@ func TestValidInt64Value(t *testing.T) {
 	}
 }
 
+func TestValidUintValueNoNotBefore(t *testing.T) {
+	naf := int64(1618968940)
+	tValidator := timeValidator{
+		AllowInt: true,
+		Naf:      &naf,
+		Required: true,
+	}
+	testValue := int64(1618968930)
+	valueKind := reflect.TypeOf(testValue).Kind()
+	isValid, err := tValidator.Validate(testValue, "testValue", valueKind)
+	if !isValid {
+		t.Error("isValid should be true, but an error occurred: ", err.Error())
+	}
+}
+
+func TestValidUintValueNoNotAfter(t *testing.T) {
+	nbf := int64(1618968920)
+	tValidator := timeValidator{
+		AllowInt: true,
+		Nbf:      &nbf,
+		Required: true,
+	}
+	testValue := int64(1618968930)
+	valueKind := reflect.TypeOf(testValue).Kind()
+	isValid, err := tValidator.Validate(testValue, "testValue", valueKind)
+	if !isValid {
+		t.Error("isValid should be true, but an error occurred: ", err.Error())
+	}
+}
+
 func TestValidNotBeforeInclusive(t *testing.T) {
 	nbf, naf := int64(1618968920), int64(1618968940)
 	tValidator := timeValidator{

@@ -20,6 +20,32 @@ func TestValidUintValue(t *testing.T) {
 	}
 }
 
+func TestValidUintValueNoMin(t *testing.T) {
+	max := uint64(3)
+	tValidator := uintValidator{
+		Max: &max,
+	}
+	testValue := uint(2)
+	valueKind := reflect.TypeOf(testValue).Kind()
+	isValid, err := tValidator.Validate(testValue, "testValue", valueKind)
+	if !isValid {
+		t.Error("isValid should be true, but an error occurred: ", err.Error())
+	}
+}
+
+func TestValidUintValueNoMax(t *testing.T) {
+	min := uint64(1)
+	tValidator := uintValidator{
+		Min: &min,
+	}
+	testValue := uint(2)
+	valueKind := reflect.TypeOf(testValue).Kind()
+	isValid, err := tValidator.Validate(testValue, "testValue", valueKind)
+	if !isValid {
+		t.Error("isValid should be true, but an error occurred: ", err.Error())
+	}
+}
+
 func TestValidUint8Value(t *testing.T) {
 	min, max := uint64(1), uint64(3)
 	tValidator := uintValidator{
