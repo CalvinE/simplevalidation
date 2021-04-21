@@ -21,8 +21,8 @@ type emailValidator struct {
 const (
 	emailInvalidErrorTemplate          = "invalid: the field %s does cont contain a valid email. '%s' was provided"
 	emailRequiredErrorTemplate         = "required: the field %s is required"
-	emailDomainMXNotFoundErrorTemplate = "mxmissing: The field %s had no MX records found for domain %s"
-	emailDomainMXLookupErrorTemplate   = "mxerror: The field %s encountered an error occurred while validating domain MX record for domain %s. Error: %s"
+	emailDomainMXNotFoundErrorTemplate = "mx missing: The field %s had no MX records found for domain %s"
+	emailDomainMXLookupErrorTemplate   = "mx error: The field %s encountered an error occurred while validating domain MX record for domain %s. Error: %s"
 )
 
 var (
@@ -35,7 +35,11 @@ func New() validator.Validator {
 }
 
 func (ev *emailValidator) Validate(n interface{}, fieldName string, fieldKind reflect.Kind) (bool, error) {
-	value := n.(string)
+	value, ok := n.(string)
+	if !ok {
+		errorMessage := fmt.Sprintf(validator.InvalidTypeErrorTemplate, fieldName, n)
+		return false, errors.New(errorMessage)
+	}
 	valueProvided := value != ""
 
 	if ev.Required && !valueProvided {

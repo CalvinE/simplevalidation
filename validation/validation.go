@@ -190,7 +190,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 				performFieldValidation(validationData, validationErrors)
 			}
 		}
-	} else {
+	} else if validationInfo.FieldValidator != nil {
 		// perform normal field validation.
 		if validationInfo.ArrayDepth == 0 {
 			_, fieldError := validationInfo.FieldValidator.Validate(validationInfo.Value, validationInfo.Name, kind)
@@ -219,8 +219,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 				// This should not happen. add error...
 			}
 		}
-	}
-	// }
+	} // else { panic? }
 	if len(fieldErrors) > 0 {
 		(*validationErrors)[validationInfo.Name] = fieldErrors
 	}

@@ -47,7 +47,12 @@ func (nv *floatValidator) Validate(n interface{}, fieldName string, fieldKind re
 	case float32:
 		value = float64(t)
 	default: // in default case we do an assertion... it will panic if the data is not the right type.
-		value = n.(float64)
+		var ok bool
+		value, ok = n.(float64)
+		if !ok {
+			errorMessage := fmt.Sprintf(validator.InvalidTypeErrorTemplate, fieldName, t)
+			return false, errors.New(errorMessage)
+		}
 	}
 	return validateFloat(value, nv.Min, nv.Max, fieldName)
 }

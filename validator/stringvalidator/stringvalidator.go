@@ -38,7 +38,11 @@ func New() validator.Validator {
 }
 
 func (nv *stringValidator) Validate(n interface{}, fieldName string, fieldKind reflect.Kind) (bool, error) {
-	stringValue := n.(string)
+	stringValue, ok := n.(string)
+	if !ok {
+		errorMessage := fmt.Sprintf(validator.InvalidTypeErrorTemplate, fieldName, n)
+		return false, errors.New(errorMessage)
+	}
 	valueLength := len(stringValue)
 	noValueProvided := valueLength == 0
 	if nv.Min != nil {

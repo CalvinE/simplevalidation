@@ -56,6 +56,11 @@ func (tv *timeValidator) Validate(n interface{}, fieldName string, fieldKind ref
 		// }
 	}
 
+	if tv.Required && noValueProvided {
+		errorMessage := fmt.Sprintf(timeNoValueErrorTemplate, fieldName, value)
+		return false, errors.New(errorMessage)
+	}
+
 	if tv.Nbf != nil {
 		if value < *tv.Nbf {
 			nbfString := time.Unix(*tv.Nbf, 0).UTC().String()
@@ -74,12 +79,7 @@ func (tv *timeValidator) Validate(n interface{}, fieldName string, fieldKind ref
 		}
 	}
 
-	if tv.Required && noValueProvided {
-		errorMessage := fmt.Sprintf(timeNoValueErrorTemplate, fieldName, value)
-		return false, errors.New(errorMessage)
-	}
 	return true, nil
-
 }
 
 func (tv *timeValidator) ReadOptionsFromTagItems(items []string) error {

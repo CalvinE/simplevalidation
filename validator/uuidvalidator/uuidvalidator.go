@@ -46,7 +46,12 @@ func (uv *uuidValidator) Validate(n interface{}, fieldName string, fieldKind ref
 			value, parseError = uuid.Parse(t)
 		}
 	default:
-		value = t.(uuid.UUID)
+		var ok bool
+		value, ok = t.(uuid.UUID)
+		if !ok {
+			errorMessage := fmt.Sprintf(validator.InvalidTypeErrorTemplate, fieldName, t)
+			return false, errors.New(errorMessage)
+		}
 		if (t == uuid.UUID{}) {
 			noValueProvided = !uv.AllowEmptyUUID
 		}

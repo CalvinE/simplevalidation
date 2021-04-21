@@ -30,7 +30,11 @@ func New() validator.Validator {
 }
 
 func (pcv *postalcodeValidator) Validate(n interface{}, fieldName string, fieldKind reflect.Kind) (bool, error) {
-	value := n.(string)
+	value, ok := n.(string)
+	if !ok {
+		errorMessage := fmt.Sprintf(validator.InvalidTypeErrorTemplate, fieldName, n)
+		return false, errors.New(errorMessage)
+	}
 	valueProvided := value != ""
 
 	if pcv.Required && !valueProvided {
