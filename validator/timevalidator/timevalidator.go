@@ -18,7 +18,8 @@ type timeValidator struct {
 	// Nbf stands for Not Before and must be a unix timestamp that can be cast as an int64.
 	Nbf *int64
 	// Nbf stands for Not After and must be a unix timestamp that can be cast as an int64.
-	Naf      *int64
+	Naf *int64
+	// Required only checks for the default value of a time struct. If an int64 is used as input this parameter is ignored.
 	Required bool
 }
 
@@ -48,12 +49,8 @@ func (tv *timeValidator) Validate(n interface{}, fieldName string, fieldKind ref
 		}
 		value = t
 	default:
-		// var ok bool
-		// value, ok = t.(int64)
-		// if !ok {
 		errorMessage := fmt.Sprintf(validator.InvalidTypeErrorTemplate, fieldName, t)
 		return false, errors.New(errorMessage)
-		// }
 	}
 
 	if tv.Required && noValueProvided {

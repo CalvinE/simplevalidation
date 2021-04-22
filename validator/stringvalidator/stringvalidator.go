@@ -53,7 +53,7 @@ func (nv *stringValidator) Validate(n interface{}, fieldName string, fieldKind r
 	}
 	if nv.Max != nil {
 		if valueLength > *nv.Max {
-			errorMessage := fmt.Sprintf(stringMaxLengthTemplate, fieldName, stringValue, valueLength, *nv.Min)
+			errorMessage := fmt.Sprintf(stringMaxLengthTemplate, fieldName, stringValue, valueLength, *nv.Max)
 			return false, errors.New(errorMessage)
 		}
 	}

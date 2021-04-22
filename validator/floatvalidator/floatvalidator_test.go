@@ -103,7 +103,7 @@ func TestValidInvalidMin(t *testing.T) {
 	} else if err == nil {
 		t.Error("err should be populated")
 	} else if hasRightIndex := strings.Index(err.Error(), expectedErrorPrefix); hasRightIndex == -1 {
-		t.Errorf("err.Error() begin with '%s'", expectedErrorPrefix)
+		t.Errorf("err.Error() begin with '%s': %s", expectedErrorPrefix, err.Error())
 	}
 }
 
@@ -122,7 +122,7 @@ func TestValidInvalidMax(t *testing.T) {
 	} else if err == nil {
 		t.Error("err should be populated")
 	} else if hasRightIndex := strings.Index(err.Error(), expectedErrorPrefix); hasRightIndex == -1 {
-		t.Errorf("err.Error() begin with '%s'", expectedErrorPrefix)
+		t.Errorf("err.Error() begin with '%s': %s", expectedErrorPrefix, err.Error())
 	}
 }
 
@@ -141,6 +141,20 @@ func TestValidInvalidType(t *testing.T) {
 	} else if err == nil {
 		t.Error("err should be populated")
 	} else if hasRightIndex := strings.Index(err.Error(), expectedErrorPrefix); hasRightIndex == -1 {
-		t.Errorf("err.Error() begin with '%s'", expectedErrorPrefix)
+		t.Errorf("err.Error() begin with '%s': %s", expectedErrorPrefix, err.Error())
+	}
+}
+
+func TestReadOptionsFromTagItemsAllParameters(t *testing.T) {
+	// example `validate:"float,min=-7.7,max=7.7"`
+	testTag := "float,min=-7.7,max=7.7"
+	tagArgs := strings.Split(testTag, ",")
+	tValidator := floatValidator{}
+	tValidator.ReadOptionsFromTagItems(tagArgs[1:])
+	if tValidator.Min == nil || *tValidator.Min != -7.7 {
+		t.Error("*Min should be -7")
+	}
+	if tValidator.Max == nil || *tValidator.Max != 7.7 {
+		t.Error("*Max should be 7")
 	}
 }

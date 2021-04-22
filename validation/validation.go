@@ -14,6 +14,7 @@ import (
 	"github.com/calvine/simplevalidation/validator/intvalidator"
 	"github.com/calvine/simplevalidation/validator/postalcodevalidator"
 	"github.com/calvine/simplevalidation/validator/stringvalidator"
+	"github.com/calvine/simplevalidation/validator/timevalidator"
 	"github.com/calvine/simplevalidation/validator/uintvalidator"
 	"github.com/calvine/simplevalidation/validator/uuidvalidator"
 )
@@ -45,15 +46,21 @@ func (e *ValidationError) Error() string {
 	}
 	headerLine := fmt.Sprintf("%s validation failed:", dataType)
 	fmt.Fprint(&errorBuffer, headerLine)
-	for key, error := range e.Errors {
-		fmt.Fprintf(&errorBuffer, "\t%s: %s", key, error)
+	for key, err := range e.Errors {
+		for _, err2 := range err {
+			fmt.Fprintf(&errorBuffer, "\t%s: %s", key, err2.Error())
+		}
 	}
 	return errorBuffer.String()
 }
 
-var (
+const (
+	noValidatorWithNameErrorTemplate = "no validator: validator of type %s is not registered."
 	// pointerNilTemplate is the error message template then a required value is a pointer and also nil.
-	pointerNilTemplate string = "field %s was nil but is required"
+	pointerNilErrorTemplate = "required: field %s was nil but is required"
+)
+
+var (
 	// validators is a map contains a contains a validator.ValidatorFactory for each registered validator name.
 	validators map[string]validator.ValidatorFactory = map[string]validator.ValidatorFactory{
 		"email":      emailvalidator.New,
@@ -62,6 +69,7 @@ var (
 		"uint":       uintvalidator.New,
 		"postalcode": postalcodevalidator.New,
 		"string":     stringvalidator.New,
+		"time":       timevalidator.New,
 		"uuid":       uuidvalidator.New,
 	}
 )
@@ -74,7 +82,7 @@ func getValidatorFromTag(validatorName, fieldName string) (validator.Validator, 
 	}
 	typeValidatorFactory, ok := validators[validatorName]
 	if !ok {
-		errMsg := fmt.Sprintf("Validator of type %s is not registered.", validatorName)
+		errMsg := fmt.Sprintf(noValidatorWithNameErrorTemplate, validatorName)
 		return nil, errors.New(errMsg)
 	}
 	return typeValidatorFactory(), nil
@@ -122,7 +130,7 @@ func performFieldValidation(validationInfo validationparams.ValidationParams, va
 			// If required is not the second arg then its not required.
 			return
 		} else if validationInfo.Required && isNil {
-			errorMessage := fmt.Sprintf(pointerNilTemplate, validationInfo.Name)
+			errorMessage := fmt.Sprintf(pointerNilErrorTemplate, validationInfo.Name)
 			fieldErrors = append(fieldErrors, errors.New(errorMessage))
 		} else {
 			fieldValue := value.Elem().Interface()
@@ -245,6 +253,8 @@ func ValidateStructWithTag(s interface{}) *ValidationError {
 	validationErrors := validationErrorMap{}
 	validationData := validationparams.New()
 	validationData.Value = s
+	// default name for value being validated.
+	validationData.Name = "value"
 	performFieldValidation(validationData, &validationErrors)
 	if len(validationErrors) > 0 {
 		return &ValidationError{
